@@ -2,11 +2,12 @@
 
 import {IconCloud} from "@/components/magicui/icon-cloud";
 import {Particles} from "@/components/magicui/particles";
-import {ShimmerButton} from "@/components/magicui/shimmer-button";
+import  ShimmerButton  from "@/components/magicui/shimmer-button";
 import { useAuthStore } from "@/store/Auth";
 import Link from "next/link";
 import React from "react";
 import { Confetti } from "@/components/magicui/confetti";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
 const slugs = [
   "typescript",
@@ -44,7 +45,6 @@ const slugs = [
 const HeroSectionHeader = () => {
   const { session } = useAuthStore();
 
-  
 
   return (
     <div className="container mx-auto px-4">
@@ -58,17 +58,17 @@ const HeroSectionHeader = () => {
       <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="flex items-center justify-center">
           <div className="space-y-4 text-center">
-            <h1 className="pointer-events-none z-10 whitespace-pre-wrap bg-gradient-to-b from-[#ffd319] via-[#ff2975] to-[#8c1eff] bg-clip-text text-center text-8xl font-bold leading-none tracking-tighter text-transparent">
+            <AnimatedGradientText className="text-8xl font-extrabold font-mono">
               TechFlow
-            </h1>
-            <p className="text-center border-2 border-none rounded-4xl shadow-pink-500 shadow-sm text-xl font-bold leading-none tracking-tighter">
+            </AnimatedGradientText>
+            <p className="text-center text-white border-2 border-none p-5 rounded-4xl shadow-pink-500 shadow-sm text-xl font-bold leading-none tracking-tighter">
               Ask questions, share knowledge, and collaborate with developers
               worldwide. Join our community and enhance your coding skills!
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-4 ">
               {session ? (
                 <Link href="/questions/ask">
-                  <ShimmerButton className="shadow-2xl">
+                  <ShimmerButton className="shadow-2xl ">
                     <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-black dark:from-white dark:to-slate-900/10 lg:text-lg">
                       Ask a question
                     </span>
@@ -76,22 +76,24 @@ const HeroSectionHeader = () => {
                 </Link>
               ) : (
                 <>
-                  <Link href="/register">
-                    <ShimmerButton 
-                   
-                    className="shadow-2xl">
-                      <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg h">
+                  <Link href="/auth/register">
+                    <ShimmerButton
+                      // onClick={handleClick}
+                      className="shadow-md hover:shadow-pink-600 border-2"
+                    >
+                      <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg h shadow-md hover:shadow-amber-600">
                         Sign up
                       </span>
+                      
                     </ShimmerButton>
                     
                   </Link>
-                  <Link
-                    href="/login"
-                    className="relative rounded-full border border-neutral-200 px-8 py-3 font-medium text-black dark:border-white/[0.2] dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-300"
-                  >
-                    <span>Login</span>
-                    <span className="absolute inset-x-0 -bottom-px mx-auto h-px w-1/2 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+                  <Link href="/auth/login">
+                    <ShimmerButton className="shadow-md hover:shadow-pink-600 border-2">
+                      <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg h shadow-md hover:shadow-pink-600">
+                        Log in
+                      </span>
+                    </ShimmerButton>
                   </Link>
                 </>
               )}

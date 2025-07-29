@@ -16,7 +16,11 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   }, [session, router]);
 
   if (session) {
-    return null; // or a loading spinner
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Redirecting to home...</p>
+      </div>
+    );
   }
 
   return (

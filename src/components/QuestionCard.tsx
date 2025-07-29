@@ -1,94 +1,41 @@
-"use client";
-
+// QuestionCard.tsx
 import React from "react";
-import { BorderBeam } from "./magicui/border-beam";
-import Link from "next/link";
-import { Models } from "appwrite";
-import slugify from "@/utils/slugify";
-import { avatars } from "@/models/client/config";
-import convertDateToRelativeTime from "@/utils/relativeTime";
+import { QuestionDocument } from "@/app/questions/[questId]/[questName]/appwrite";
 
+interface QuestionCardProps {
+  ques: QuestionDocument;
+}
 
-
-// Define the type for the question document
-type QuestionDocument = Models.Document & {
-  votes?: any[]; // Assuming votes is an array of vote objects
-  answers?: any[];
-  tags: string[]; // Array of tags associated with the question
-  title: string;
-  author: {
-    name: string;
-    $id: string;
-    reputation: number | string; 
-  };
-  $createdAt: string;
-};
-
-// QuestionCard component to display a question with its details
-const QuestionCard = ({ ques }: { ques: QuestionDocument }) => {
-
-  // State to manage the height of the component for animations
-  const [height, setHeight] = React.useState(0); 
-  const ref = React.useRef<HTMLDivElement>(null); // Reference to the component's DOM element
-
-  // Effect to set the height of the component when it mounts or updates
-  // This is used for animations and layout adjustments
-  React.useEffect(() => {
-    if (ref.current) {
-      setHeight(ref.current.clientHeight);
-    }
-  }, [ref]);
-
+const QuestionCard: React.FC<QuestionCardProps> = ({ ques }) => {
   return (
-    <div
-      ref={ref}
-      className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-white/20 bg-white/5 p-4 duration-200 hover:bg-white/10 sm:flex-row"
-    >
-      <BorderBeam size={height} duration={12} delay={9} />
-      <div className="relative shrink-0 text-sm sm:text-right">
-        // Display the number of votes and answers for the question
-        <p>{ques.votes?.length ?? 0} votes</p> 
-        <p>{ques.answers?.length ?? 0} answers</p>
-      </div>
-      <div className="relative w-full">
-        <Link
-        // Link to the question detail page using the question ID and slugified title
-          href={`/questions/${ques.$id}/${slugify(ques.title)}`}
-          className="text-orange-500 duration-200 hover:text-orange-600"
-        >
-          <h2 className="text-xl">{ques.title}</h2>
-        </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          {ques.tags.map((tag: string) => (
-            <Link
-              key={tag}
-              href={`/questions?tag=${tag}`}
-              className="inline-block rounded-lg bg-white/10 px-2 py-0.5 duration-200 hover:bg-white/20"
-            >
-              #{tag}
-            </Link>
-          ))}
-          <div className="ml-auto flex items-center gap-1">
-            <picture>
-              <img
-                src={avatars.getInitials(ques.author.name, 24, 24)}
-                alt={ques.author.name}
-                className="rounded-lg"
-              />
-            </picture>
-            <Link
-              href={`/users/${ques.author.$id}/${slugify(ques.author.name)}`}
-              className="text-orange-500 hover:text-orange-600"
-            >
-              {ques.author.name}
-            </Link>
-            <strong>&quot;{ques.author.reputation}&quot;</strong>
-          </div>
-          <span>
-            asked {convertDateToRelativeTime(new Date(ques.$createdAt))}
-          </span>
+    <div className="border rounded-lg p-4">
+      <h3 className="text-lg font-semibold">{ques.title}</h3>
+      <p className="text-gray-600 mt-2">{ques.content}</p>
+
+      <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center space-x-4">
+          <span>{ques.totalVotes ?? 0} votes</span>
+          <span>{ques.totalAnswers ?? 0} answers</span>
+        </div>
+
+        <div className="text-sm text-gray-500">
+          Asked by {ques.author?.name ?? "Unknown"}
+          (Rep: {ques.author?.reputation ?? 0})
         </div>
       </div>
+
+      {ques.tags && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {ques.tags.map((tag, index) => (
+            <span
+              key={index}
+              className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -81,9 +81,9 @@ function registerPage() {
         Welcome to Techflow
       </h2>
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-        Signup with Techflow if you you don&apos;t have an account.
+        Signup with Techflow if you you don't have an account.
         <br /> If you already have an account,{" "}
-        <Link href="/login" className="text-orange-500 hover:underline">
+        <Link href="/auth/login" className="text-orange-500 hover:underline">
           login
         </Link>{" "}
         to Techflow
@@ -133,7 +133,7 @@ function registerPage() {
             className="text-black"
             id="password"
             name="password"
-            placeholder="••••••••"
+            placeholder="********"
             type="password"
           />
         </LabelInputContainer>

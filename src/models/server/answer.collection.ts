@@ -1,10 +1,10 @@
 import { Permission } from "node-appwrite";
-import { db, answerCollection } from "../name";
+import { databaseId, answerCollection } from "../name";
 import { databases } from "./config";
 
 export default async function createAnswerCollection() {
 await databases.createCollection(
-  db,
+  databaseId,
   answerCollection,
   answerCollection,
   [
@@ -13,16 +13,16 @@ await databases.createCollection(
     Permission.create("users"),
     Permission.update("users"),
     Permission.delete("users"),
-  ],
+  ]
 );
     console.log("Answer collection created successfully.");
 
     // create attributes
    await Promise.all([
-       databases.createStringAttribute(db, answerCollection, "content", 10000, true),
-       databases.createStringAttribute(db, answerCollection, "authorId", 100, true),
-       databases.createStringAttribute(db, answerCollection, "questionId", 100, true),
-       databases.createStringAttribute(db, answerCollection, "attachmentId", 100, false),
+       databases.createStringAttribute(databaseId, answerCollection, "content", 10000, true),
+       databases.createStringAttribute(databaseId, answerCollection, "authorId", 100, true),
+       databases.createStringAttribute(databaseId, answerCollection, "questionId", 100, true),
+       databases.createStringAttribute(databaseId, answerCollection, "attachmentId", 100, false),
    ]);
    console.log("Attributes for answer collection created successfully.");
 }

@@ -1,74 +1,66 @@
-import { answerCollection, db } from "@/models/name";
-import { databases, users } from "@/models/server/config";
-import { UserPrefs } from "@/store/Auth";
+// src/app/api/answers/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { databases, users } from "@/models/server/config";
+import { databaseId, answerCollection } from "@/models/name";
 import { ID } from "node-appwrite";
+import { UserPrefs } from "@/store/Auth";
 
 export async function POST(request: NextRequest) {
-    try {
-        const {answer, questionId, authorId} = await request.json()
+  try {
+    const { answer, questionId, authorId } = await request.json();
 
-        const response = await databases.createDocument(db,  answerCollection, ID.unique(), {
-            content: answer,
-            questionId: questionId,
-            authorId: authorId
-        })
+    // ✅ Remove generic - let SDK infer type
+    const created = await databases.createDocument(
+      databaseId,
+      answerCollection,
+      ID.unique(),
+      {
+        content: answer,
+        questionId,
+        authorId,
+      }
+    );
 
-        // increase author reputation
-        const prefs = await users.getPrefs<UserPrefs>(authorId )
-        await users.updatePrefs(authorId, 
-            {
-                reputation: Number(prefs.reputation) + 1
-            }
-        )
-        return NextResponse.json({
-            success: true,
-            data: response
-        }, {
-            status: 201
-        })
+    // Update reputation
+    const prefs = await users.getPrefs<UserPrefs>(authorId);
+    await users.updatePrefs(authorId, {
+      reputation: (Number(prefs.reputation) || 0) + 1,
+    });
 
-
-
-    } catch (error: any) {
-        return NextResponse.json({
-            error: error.message || "An unexpected error occurred"
-        }, {
-            status: error?.status || error?.code || 500
-        })
-    }
+    return NextResponse.json({ success: true, data: created }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Error creating answer" },
+      { status: 500 }
+    );
+  }
 }
 
+
 export async function DELETE(request: NextRequest) {
-    try {
-       const {answerId} = await request.json()
-       const answer = await databases.getDocument(db, answerCollection, answerId)
+  try {
+    const { answerId } = await request.json();
 
-       const response = await databases.deleteDocument(db, answerCollection, answerId)
+    // ✅ Remove generic - let SDK infer type  
+    const existing = await databases.getDocument(
+      databaseId,
+      answerCollection,
+      answerId
+    );
 
-       // decrease author reputation
-       const prefs = await users.getPrefs<UserPrefs>(answer.authorId);
-       await users.updatePrefs(answer.authorId, {
-         reputation: Number(prefs.reputation) - 1,
-       });
-       return NextResponse.json(
-         {
-           success: true,
-           data: response,
-         },
-         {
-           status: 201,
-         }
-       );
+    await databases.deleteDocument(databaseId, answerCollection, answerId);
 
-    } catch (error: any) {
-         return NextResponse.json(
-           {
-             message: error?.message || "Error deleting answer",
-           },
-           {
-             status: error?.status || error?.code || 500,
-           }
-         );
-    }
+    // Update reputation
+    const prefs = await users.getPrefs<UserPrefs>(existing.authorId);
+    await users.updatePrefs(existing.authorId, {
+      reputation: (Number(prefs.reputation) || 0) - 1,
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Error deleting answer" },
+      { status: 500 }
+    );
+  }
 }

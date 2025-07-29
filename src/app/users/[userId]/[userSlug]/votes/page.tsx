@@ -1,142 +1,91 @@
 import Pagination from "@/components/Pagination";
-import {
-  answerCollection,
-  db,
-  questionCollection,
-  voteCollection,
-} from "@/models/name";
-import { databases } from "@/models/server/config";
-import convertDateToRelativeTime from "@/utils/relativeTime";
-import slugify from "@/utils/slugify";
 import Link from "next/link";
-import { Query } from "node-appwrite";
-import React from "react";
+import slugify from "@/utils/slugify";
+import convertDateToRelativeTime from "@/utils/relativeTime";
 
-const Page = async ({
+type Vote = {
+  $id: string;
+  type: "question" | "answer";
+  typeId: string;
+  voteStatus: "upvoted" | "downvoted";
+  $createdAt: string;
+  // Add questionTitle in your API response
+  questionTitle: string;
+};
+
+export default async function VotePage({
   params,
   searchParams,
 }: {
   params: { userId: string; userSlug: string };
-  searchParams: { page?: string; voteStatus?: "upvoted" | "downvoted" };
-}) => {
-  searchParams.page ||= "1";
+  searchParams: { page?: string; voteStatus?: string };
+}) {
+  const { userId, userSlug } = params;
+  const page = parseInt(searchParams.page || "1", 10);
+  const voteStatusQuery = searchParams.voteStatus
+    ? `&voteStatus=${searchParams.voteStatus}`
+    : "";
 
-  const query = [
-    Query.equal("votedById", params.userId),
-    Query.orderDesc("$createdAt"),
-    Query.offset((+searchParams.page - 1) * 25),
-    Query.limit(25),
-  ];
-
-  if (searchParams.voteStatus)
-    query.push(Query.equal("voteStatus", searchParams.voteStatus));
-
-  const votes = await databases.listDocuments(db, voteCollection, query);
-
-  votes.documents = await Promise.all(
-    votes.documents.map(async (vote) => {
-      const questionOfTypeQuestion =
-        vote.type === "question"
-          ? await databases.getDocument(db, questionCollection, vote.typeId, [
-              Query.select(["title"]),
-            ])
-          : null;
-
-      if (questionOfTypeQuestion) {
-        return {
-          ...vote,
-          question: questionOfTypeQuestion,
-        };
-      }
-
-      const answer = await databases.getDocument(
-        db,
-        answerCollection,
-        vote.typeId
-      );
-      const questionOfTypeAnswer = await databases.getDocument(
-        db,
-        questionCollection,
-        answer.questionId,
-        [Query.select(["title"])]
-      );
-
-      return {
-        ...vote,
-        question: questionOfTypeAnswer,
-      };
-    })
+  // Call your own API
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/vote?userId=${encodeURIComponent(
+      userId
+    )}&page=${page}${voteStatusQuery}`,
+    { cache: "no-store" }
   );
+  if (!res.ok) throw new Error("Failed to load votes");
+  const { documents: votes, total } = (await res.json()) as {
+    documents: Vote[];
+    total: number;
+  };
 
   return (
-    <div className="px-4">
-      <div className="mb-4 flex justify-between">
-        <p>{votes.total} votes</p>
-        <ul className="flex gap-1">
-          <li>
-            <Link
-              href={`/users/${params.userId}/${params.userSlug}/votes`}
-              className={`block w-full rounded-full px-3 py-0.5 duration-200 ${
-                !searchParams.voteStatus ? "bg-white/20" : "hover:bg-white/20"
-              }`}
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">
+        {total} {total === 1 ? "Vote" : "Votes"}
+      </h1>
+
+      {votes.length === 0 ? (
+        <p className="text-center text-gray-500">No votes to display.</p>
+      ) : (
+        <div className="space-y-4">
+          {votes.map((vote) => (
+            <div
+              key={vote.$id}
+              className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md"
             >
-              All
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`/users/${params.userId}/${params.userSlug}/votes?voteStatus=upvoted`}
-              className={`block w-full rounded-full px-3 py-0.5 duration-200 ${
-                searchParams?.voteStatus === "upvoted"
-                  ? "bg-white/20"
-                  : "hover:bg-white/20"
-              }`}
-            >
-              Upvotes
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`/users/${params.userId}/${params.userSlug}/votes?voteStatus=downvoted`}
-              className={`block w-full rounded-full px-3 py-0.5 duration-200 ${
-                searchParams?.voteStatus === "downvoted"
-                  ? "bg-white/20"
-                  : "hover:bg-white/20"
-              }`}
-            >
-              Downvotes
-            </Link>
-          </li>
-        </ul>
-      </div>
-      <div className="mb-4 max-w-3xl space-y-6">
-        {votes.documents.map((vote) => (
-          <div
-            key={vote.$id}
-            className="rounded-xl border border-white/40 p-4 duration-200 hover:bg-white/10"
-          >
-            <div className="flex">
-              <p className="mr-4 shrink-0">{vote.voteStatus}</p>
-              <p>
-                <Link
-                  href={`/questions/${vote.question.$id}/${slugify(
-                    vote.question.title
-                  )}`}
-                  className="text-orange-500 hover:text-orange-600"
+              <div className="flex justify-between items-center">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                    vote.voteStatus === "upvoted"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
                 >
-                  {vote.question.title}
-                </Link>
-              </p>
+                  {vote.voteStatus === "upvoted" ? "↑ Upvoted" : "↓ Downvoted"}
+                </span>
+                <time className="text-sm text-gray-500">
+                  {convertDateToRelativeTime(new Date(vote.$createdAt))}
+                </time>
+              </div>
+              <Link
+                href={`/questions/${vote.typeId}/${slugify(
+                  vote.questionTitle
+                )}`}
+                className="mt-2 block text-lg text-blue-600 hover:underline"
+              >
+                {vote.questionTitle}
+              </Link>
             </div>
-            <p className="text-right text-sm">
-              {convertDateToRelativeTime(new Date(vote.$createdAt))}
-            </p>
-          </div>
-        ))}
-      </div>
-      <Pagination total={votes.total} limit={25} />
+          ))}
+        </div>
+      )}
+
+      {total > 25 && (
+        <div className="flex justify-center">
+          <Pagination total={total} limit={25} />
+        </div>
+      )}
     </div>
   );
-};
-
-export default Page;
+}

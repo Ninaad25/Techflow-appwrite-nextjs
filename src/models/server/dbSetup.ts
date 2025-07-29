@@ -1,4 +1,4 @@
-import { db } from "../name";
+import { databaseId } from "../name";
 import createAnswerCollection from "./answer.collection";
 import createCommentCollection from "./comment.collection";
 import createQuestionCollection from "./question.collection";
@@ -9,12 +9,12 @@ import { databases } from "./config";
 
 export default async function getOrCreateDB() {
     try {
-        await databases.get(db);
+        await databases.get(databaseId);
         console.log("Database already exists.");
         
     } catch (error) {
         try {
-            await databases.create(db, db)
+            await databases.create(databaseId, databaseId);
             console.log("Database created successfully.");
             // Create collections
             await Promise.all([

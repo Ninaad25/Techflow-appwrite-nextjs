@@ -6,17 +6,15 @@ import { useAuthStore } from "@/store/Auth";
 import convertDateToRelativeTime from "@/utils/relativeTime";
 import slugify from "@/utils/slugify";
 import { IconTrash } from "@tabler/icons-react";
-import { ID, Models } from "appwrite";
+import { ID, Models } from "node-appwrite";
 import Link from "next/link";
 import React from "react";
-
 
 interface Author {
   $id: string;
   name: string;
-  reputation?: number; // optional if you use it
+  reputation?: number;
 }
-
 
 interface CommentDocument extends Models.Document {
   authorId: string;
@@ -24,18 +22,17 @@ interface CommentDocument extends Models.Document {
   author: Author;
   type: "question" | "answer";
   typeId: string;
-  // Add other custom fields if you have them
 }
 
 interface CommentDocumentList extends Models.DocumentList<CommentDocument> {}
 
 const Comments = ({
-  comments: _comments, 
+  comments: _comments,
   type,
   typeId,
   className,
 }: {
-  comments: CommentDocumentList; // Initial comments list
+  comments: CommentDocumentList;
   type: "question" | "answer";
   typeId: string;
   className?: string;
@@ -57,18 +54,15 @@ const Comments = ({
         {
           content: newComment,
           authorId: user.$id,
-          type: type,
-          typeId: typeId,
+          type,
+          typeId,
         }
       );
-      setNewComment("");
 
-      // Optimistically update comments list
       setComments((prev) => ({
         total: prev.total + 1,
         documents: [
           {
-            // Assign all required base document properties from response, e.g.:
             $id: response.$id,
             $createdAt: response.$createdAt,
             $updatedAt: response.$updatedAt,
@@ -76,20 +70,17 @@ const Comments = ({
             $collectionId: response.$collectionId,
             $databaseId: response.$databaseId,
             $sequence: response.$sequence,
-
-            // Your custom fields:
             authorId: user.$id,
             content: newComment,
             author: user,
             type,
             typeId,
-
-            
           },
-          ...prev.documents, // Add new comment at the start
+          ...prev.documents,
         ],
       }));
 
+      setNewComment("");
     } catch (error: any) {
       window.alert(error?.message || "Error creating comment");
     }
@@ -98,7 +89,6 @@ const Comments = ({
   const deleteComment = async (commentId: string) => {
     try {
       await databases.deleteDocument(db, commentCollection, commentId);
-
       setComments((prev) => ({
         total: prev.total - 1,
         documents: prev.documents.filter(
@@ -115,7 +105,7 @@ const Comments = ({
       {comments.documents.length === 0 && (
         <p className="text-gray-500">No comments yet.</p>
       )}
-      // Render each comment
+      {/* Render each comment */}
       {comments.documents.map((comment) => (
         <div
           key={comment.$id}

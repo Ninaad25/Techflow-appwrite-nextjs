@@ -7,14 +7,13 @@ import registerPage from "./(auth)/register/page";
 
 // this function runs everywhere in the app
 export async function middleware(request: NextRequest) {
+  await Promise.all([
+    getOrCreateDB(), // ensure the database is set up
+    getOrCreateStorage(), // ensure the storage is set up
+  ]);
 
-    await Promise.all([
-        getOrCreateDB(), // ensure the database is set up
-        getOrCreateStorage() // ensure the storage is set up
-    ])
-   
   return NextResponse.next(); // move to the next middleware
-} 
+}
 
 // our middleware part will not run on anything that is in "matcher"
 export const config = {
@@ -26,6 +25,7 @@ export const config = {
  */
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
+
     // you can add more paths here if needed
     // "/home",etc
   ],

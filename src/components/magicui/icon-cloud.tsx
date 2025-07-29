@@ -285,12 +285,12 @@ export function IconCloud({ icons, images }: IconCloudProps) {
           // Show numbered circles if no icons/images are provided
           ctx.beginPath();
           ctx.arc(0, 0, 20, 0, Math.PI * 2);
-          ctx.fillStyle = "#4444ff";
+          ctx.fillStyle = "#e6005c";
           ctx.fill();
           ctx.fillStyle = "white";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.font = "16px Arial";
+          ctx.font = "18px Arial";
           ctx.fillText(`${icon.id + 1}`, 0, 0);
         }
 
@@ -311,13 +311,13 @@ export function IconCloud({ icons, images }: IconCloudProps) {
   return (
     <canvas
       ref={canvasRef}
-      width={400}
-      height={400}
+      width={280}
+      height={280}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      className="rounded-lg"
+      className="rounded-lg size-124 "
       aria-label="Interactive 3D Icon Cloud"
       role="img"
     />

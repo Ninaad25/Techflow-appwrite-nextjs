@@ -16,6 +16,7 @@ import Comments from "@/components/Comments";
 import { MarkdownPreview } from "@/components/RTE";
 import convertDateToRelativeTime from "@/utils/relativeTime";
 
+
 // Interfaces for author info
 interface Author {
   $id: string;
@@ -25,12 +26,15 @@ interface Author {
 
 // Question document interface with additional fields
 export interface QuestionDocument extends Models.Document {
-  authorId: string;
   title: string;
   content?: string;
   tags?: string[];
-  $sequence: number;
-  author: Author;
+  $sequence?: number;
+  author?: {
+    $id: string;
+    reputation?: number;
+    name: string;
+  };
   totalAnswers: number;
   totalVotes: number;
   votes?: Models.Document[]; // Optional, can contain vote docs if needed
@@ -78,7 +82,7 @@ interface AnswerDocumentList {
   total: number;
 }
 
-const Page = async ({
+const QuesPage = async ({
   params,
   searchParams,
 }: {
@@ -150,7 +154,7 @@ const Page = async ({
           <h3 className="text-xl font-semibold">{q.title}</h3>
           <p className="text-sm text-gray-600">
             Asked {convertDateToRelativeTime(new Date(q.$createdAt))} by{" "}
-            {q.author.name} (Rep: {q.author.reputation})
+            {q.author?.name ?? "Unknown"} (Rep: {q.author?.reputation ?? 0})
           </p>
           <p>{q.content}</p>
           <p className="mt-2">
@@ -158,19 +162,18 @@ const Page = async ({
             {(q.tags ?? []).join(", ")}
           </p>
           {/* Add any further UI like VoteButtons, Comments, Answers list here */}
-            
         </article>
       ))}
-        {questionsResponse.total === 0 && (
-            <p className="text-center text-gray-500">No questions found.</p>
-            )}
-        <Pagination
-            className="bg-gray-200"
-            total={questionsResponse.total}
-            limit={25}
-        />
+      {questionsResponse.total === 0 && (
+        <p className="text-center text-gray-500">No questions found.</p>
+      )}
+      <Pagination
+        className="bg-gray-200"
+        total={questionsResponse.total}
+        limit={25}
+      />
     </>
   );
 };
 
-export default Page;
+export default QuesPage;

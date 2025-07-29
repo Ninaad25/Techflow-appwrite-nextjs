@@ -39,6 +39,9 @@ function useMousePosition(): MousePosition {
 interface MagicContainerProps {
   children?: ReactNode;
   className?: any;
+  space?: string; // add this line if space prop is intended
+  type?: string;
+  gap?: string;
 }
 
 const MagicContainer = ({ children, className }: MagicContainerProps) => {

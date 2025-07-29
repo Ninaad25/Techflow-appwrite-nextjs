@@ -1,6 +1,6 @@
 "use client";
 
-import { ID, Models } from "appwrite";
+import { ID, Models } from "node-appwrite";
 
 import React from "react";
 

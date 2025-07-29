@@ -5,11 +5,9 @@ import { db, voteCollection } from "@/models/name";
 import { useAuthStore } from "@/store/Auth";
 import { cn } from "@/lib/utils";
 import { IconCaretUpFilled, IconCaretDownFilled } from "@tabler/icons-react";
-import { ID, Models, Query } from "appwrite";
+import { ID, Models, Query } from "node-appwrite";
 import { useRouter } from "next/navigation";
 import React from "react";
-
-
 
 type VoteType = "question" | "answer";
 type VoteStatus = "upvoted" | "downvoted" | "none";
@@ -17,8 +15,8 @@ type VoteStatus = "upvoted" | "downvoted" | "none";
 interface VoteButtonsProps {
   type: VoteType;
   id: string;
-  upvotes: Models.DocumentList;
-  downvotes: Models.DocumentList;
+  upvotes: Models.DocumentList<Models.Document>;
+  downvotes: Models.DocumentList<Models.Document>;
   className?: string;
 }
 
@@ -36,10 +34,9 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   const [votedDocument, setVotedDocument] = React.useState<
     Models.Document | null | undefined
   >(undefined);
-  const [voteResult, setVoteResult] = React.useState<number>(
+  const [voteResult, setVoteResult] = React.useState(
     upvotes.total - downvotes.total
   );
-
   const { user } = useAuthStore();
   const router = useRouter();
 
@@ -56,7 +53,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
           Query.equal("typeId", id),
           Query.equal("votedById", user.$id),
         ]);
-        setVotedDocument(response.documents[0] as Models.Document || null);
+
+        setVotedDocument((response.documents[0] as Models.Document) || null);
       } catch (error) {
         console.error("Error fetching vote document:", error);
         setVotedDocument(null);
@@ -65,12 +63,15 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   }, [user, id, type]);
 
   const sendVote = async (voteStatus: Exclude<VoteStatus, "none">) => {
-    if (!user) return router.push("/login");
+    if (!user) return router.push("/auth/login");
     if (votedDocument === undefined) return; // still loading
 
     try {
       const response = await fetch(`/api/vote`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           votedById: user.$id,
           voteStatus,
@@ -80,7 +81,6 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
       });
 
       const data = await response.json();
-      setVotedDocument(data.data.document as Models.Document | null);
 
       if (!response.ok) throw data;
 
@@ -94,43 +94,46 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   const toggleUpvote = () => sendVote("upvoted");
   const toggleDownvote = () => sendVote("downvoted");
 
-  const currentVoteStatus: "upvoted" | "downvoted" | "none" =
+  const currentVoteStatus: VoteStatus =
     (votedDocument as VoteDocument | null)?.voteStatus ?? "none";
 
   return (
-    <div className={cn("flex flex-col items-center", className)}>
+    <div className={cn("flex flex-col items-center gap-1", className)}>
       <button
-        aria-pressed={currentVoteStatus === "upvoted"}
         onClick={toggleUpvote}
         className={cn(
-          "p-1 rounded",
-          currentVoteStatus === "upvoted"
-            ? "text-orange-500"
-            : "text-gray-400 hover:text-orange-500"
+          "p-1 rounded hover:bg-gray-100 transition-colors",
+          currentVoteStatus === "upvoted" ? "text-orange-500" : "text-gray-500"
         )}
-        aria-label="Upvote"
-        type="button"
         disabled={votedDocument === undefined}
+        aria-label="Upvote"
       >
         <IconCaretUpFilled size={24} />
       </button>
 
-      <span className="text-center font-semibold select-none">
+      <span
+        className={cn(
+          "font-semibold text-lg",
+          voteResult > 0
+            ? "text-green-600"
+            : voteResult < 0
+            ? "text-red-600"
+            : "text-gray-600"
+        )}
+      >
         {voteResult}
       </span>
 
       <button
-        aria-pressed={currentVoteStatus === "downvoted"}
         onClick={toggleDownvote}
         className={cn(
-          "p-1 rounded",
+          "p-1 rounded hover:bg-gray-100 transition-colors",
           currentVoteStatus === "downvoted"
-            ? "text-blue-500"
-            : "text-gray-400 hover:text-blue-500"
+            ? "text-orange-500"
+            : "text-gray-500"
         )}
-        aria-label="Downvote"
-        type="button"
         disabled={votedDocument === undefined}
+        aria-label="Downvote"
       >
         <IconCaretDownFilled size={24} />
       </button>

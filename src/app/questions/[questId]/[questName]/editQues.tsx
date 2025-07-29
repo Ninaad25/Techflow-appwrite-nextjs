@@ -17,14 +17,18 @@ const EditQuestion = ({
 }) => {
   const { user } = useAuthStore();
 
-  return user?.$id === authorId ? (
+  if (user?.$id !== authorId) return null;
+
+  return (
     <Link
       href={`/questions/${questionId}/${slugify(questionTitle)}/edit`}
-      className="flex h-10 w-10 items-center justify-center rounded-full border p-1 duration-200 hover:bg-white/10"
+      className="inline-flex items-center gap-1 px-2 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+      title="Edit Question"
     >
-      <IconEdit className="h-4 w-4" />
+      <IconEdit size={16} />
+      Edit
     </Link>
-  ) : null;
+  );
 };
 
 export default EditQuestion;

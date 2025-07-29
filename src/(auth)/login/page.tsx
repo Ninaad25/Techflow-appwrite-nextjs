@@ -64,13 +64,14 @@ function loginPage() {
 
   return (
     <div className="mx-auto w-full max-w-md rounded-none border border-solid border-white/30 bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
-      <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+      <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-200">
         Login to Techflow
       </h2>
+
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
         Login to Techflow
-        <br /> If you don&apos;t have an account,{" "}
-        <Link href="/register" className="text-orange-500 hover:underline">
+        <br /> If you don't have an account,{" "}
+        <Link href="/auth/register" className="text-orange-500 hover:underline">
           register
         </Link>{" "}
         with Techflow
@@ -98,17 +99,18 @@ function loginPage() {
             className="text-black"
             id="password"
             name="password"
-            placeholder="••••••••"
+            placeholder="*********"
             type="password"
           />
         </LabelInputContainer>
 
         <button
-          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+        
+          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-black shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
           type="submit"
           disabled={isLoading}
         >
-          Log in &rarr;
+          Log in {"\u2192"}
           <BottomGradient />
         </button>
 

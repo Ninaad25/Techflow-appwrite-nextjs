@@ -16,14 +16,14 @@ const Pagination = ({
   const page = searchParams.get("page") || "1";
   const totalPages = Math.ceil(total / limit);
   const router = useRouter();
-  const pathnanme = usePathname();
+  const pathname = usePathname();
 
   const prev = () => {
     if (page <= "1") return;
     const pageNumber = parseInt(page);
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("page", `${pageNumber - 1}`);
-    router.push(`${pathnanme}?${newSearchParams}`);
+    router.push(`${pathname}?${newSearchParams}`);
   };
 
   const next = () => {
@@ -31,7 +31,7 @@ const Pagination = ({
     const pageNumber = parseInt(page);
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("page", `${pageNumber + 1}`);
-    router.push(`${pathnanme}?${newSearchParams}`);
+    router.push(`${pathname}?${newSearchParams}`);
   };
 
   return (

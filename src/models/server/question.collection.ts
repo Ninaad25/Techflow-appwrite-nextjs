@@ -1,10 +1,10 @@
 import {  Permission, IndexType } from "node-appwrite"
-import {db, questionCollection } from "../name"
+import { databaseId, questionCollection } from "../name";
 import { databases } from "./config"
 
 export default async function createQuestionCollection() {
     await databases.createCollection(
-      db,
+      databaseId,
       questionCollection,
       questionCollection,
       [
@@ -13,18 +13,18 @@ export default async function createQuestionCollection() {
         Permission.read("users"),
         Permission.create("users"),
         Permission.update("users"),
-        Permission.delete("users")
+        Permission.delete("users"),
       ]
     );
     console.log("Collection questionCollection created successfully.");
     // create attributes
 
     await Promise.all([
-        databases.createStringAttribute(db, questionCollection, "title", 100, true),
-        databases.createStringAttribute(db, questionCollection, "content", 10000, true),
-        databases.createStringAttribute(db, questionCollection, "authorId", 100, true),
-        databases.createStringAttribute(db, questionCollection, "tags", 50, true, undefined, true),
-        databases.createStringAttribute(db, questionCollection, "attachmentId", 100, false),
+        databases.createStringAttribute(databaseId, questionCollection, "title", 100, true),
+        databases.createStringAttribute(databaseId, questionCollection, "content", 10000, true),
+        databases.createStringAttribute(databaseId, questionCollection, "authorId", 100, true),
+        databases.createStringAttribute(databaseId, questionCollection, "tags", 50, true, undefined, true),
+        databases.createStringAttribute(databaseId, questionCollection, "attachmentId", 100, false),
     ]);
     console.log(`Attributes for collection ${questionCollection} created successfully.`);
 
